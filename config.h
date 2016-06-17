@@ -5,6 +5,7 @@ static char *useragent      = "Mozilla/5.0 (X11; U; Unix; en-US) "
 static char *scriptfile     = "~/.surf/script.js";
 static char *styledir       = "~/.surf/styles/";
 static char *cachefolder    = "~/.surf/cache/";
+static char *historyfile    = "~/.surf/history";
 
 static Bool kioskmode       = FALSE; /* Ignore shortcuts */
 static Bool showindicators  = TRUE;  /* Show indicators in window title */
@@ -40,7 +41,7 @@ static Bool allowgeolocation      = TRUE;
 	     "prop=\"`xprop -id $2 $0 " \
 	     "| sed \"s/^$0(STRING) = \\(\\\\\"\\?\\)\\(.*\\)\\1$/\\2/\" " \
 	     "| xargs -0 printf %b | dmenu`\" &&" \
-	     "xprop -id $2 -f $1 8s -set $1 \"$prop\"", \
+	     "xprop -id $2 -f $1 8u -set $1 \"$prop\"", \
 	     p, q, winid, NULL \
 	} \
 }
@@ -66,10 +67,15 @@ static Bool allowgeolocation      = TRUE;
 	mv ~/.surf/bookmarks_new ~/.surf/bookmarks", \
 	winid, NULL } }
 
-#define HISTORY { .v = (char *[]){ "/bin/sh", "-c", \
-	"xprop -id $0 -f _SURF_GO 8s -set _SURF_GO \
+/*# define HISTORY { .v = (char *[]){ "/bin/sh", "-c", \
 	`cat ~/.surf/history | sort -ru | dmenu -l 10 -b -i || exit 0`", \
-	winid, NULL } }
+	"xprop -id $0 -f _SURF_GO 8s -set _SURF_GO \
+	winid, NULL } } */
+
+#define SETURI(p) { .v = (char *[]){ "/bin/sh", "-c", \
+"prop=\"`cat ~/.surf/history | sort -ru | dmenu -l 10 -b -i | xprop -id `cat ~/.surf/id` -f SURF_URI 8s -set _SURF_URI`\" &&" \
+"xprop -id $1 -f $0 8s -set $0 \"$prop\"", \
+p, winid, NULL } }
 
 /* PLUMB(URI) */
 /* This called when some URI which does not begin with "about:",
@@ -145,7 +151,8 @@ static Key keys[] = {
 	{ MODKEY|GDK_SHIFT_MASK,GDK_g,      togglegeolocation, { 0 } },
 	{ MODKEY,               GDK_d,      spawn,      BM_PICK },
     { MODKEY|GDK_SHIFT_MASK,GDK_d,      spawn,      BM_ADD },
-    { MODKEY,               GDK_Return, spawn,      HISTORY },
+    { MODKEY,               GDK_Return, spawn,      SETURI("_SURF_URI") },
+//    { MODKEY,               GDK_Return, spawn,      HISTORY },
 };
 
 /* button definitions */

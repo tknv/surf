@@ -392,6 +392,7 @@ cleanup(void)
 	g_free(cookiefile);
 	g_free(scriptfile);
 	g_free(stylefile);
+	g_free(historyfile);
 }
 
 void
@@ -660,7 +661,7 @@ getatom(Client *c, int a)
 	unsigned char *p = NULL;
 
 	XGetWindowProperty(dpy, GDK_WINDOW_XID(GTK_WIDGET(c->win)->window),
-	                   atoms[a], 0L, BUFSIZ, False, XA_STRING,
+	                   atoms[a], 0L, BUFSIZ, False, AnyPropertyType,
 	                   &adummy, &idummy, &ldummy, &ldummy, &p);
 	if (p)
 		strncpy(buf, (char *)p, LENGTH(buf)-1);
@@ -883,6 +884,10 @@ loaduri(Client *c, const Arg *arg)
 		reload(c, &a);
 	} else {
 		webkit_web_view_load_uri(c->view, u);
+		FILE *f;
+		f = fopen(historyfile, "a+");
+		fprintf(f, u);
+		fclose(f);
 		c->progress = 0;
 		c->title = copystr(&c->title, u);
 		updatetitle(c);
@@ -1343,6 +1348,7 @@ setup(void)
 
 	/* dirs and files */
 	cookiefile = buildfile(cookiefile);
+	historyfile = buildfile(historyfile);
 	scriptfile = buildfile(scriptfile);
 	cachefolder = buildpath(cachefolder);
 	if (stylefile == NULL) {
