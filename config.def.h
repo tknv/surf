@@ -77,6 +77,19 @@ static WebKitFindOptions findopts = WEBKIT_FIND_OPTIONS_CASE_INSENSITIVE |
         } \
 }
 
+
+/* Simple bookmarking, redux */
+#define BM_PICK { .v = (char *[]){ "/bin/sh", "-c", \
+"xprop -id $0 -f _SURF_GO 8s -set _SURF_GO \
+`cat ~/.surf/bookmarks | dmenu || exit 0`", \
+winid, NULL } }
+
+#define BM_ADD { .v = (char *[]){ "/bin/sh", "-c", \
+"(echo `xprop -id $0 _SURF_URI | cut -d '\"' -f 2` && \
+cat ~/.surf/bookmarks) | sort -u > ~/.surf/bookmarks_new && \
+mv ~/.surf/bookmarks_new ~/.surf/bookmarks", \
+winid, NULL } }
+
 /* styles */
 /*
  * The iteration will stop at the first match, beginning at the beginning of
@@ -112,15 +125,16 @@ static Key keys[] = {
 	/* Currently we have to use scrolling steps that WebKit2GTK+ gives us
 	 * d: step down, u: step up, r: step right, l:step left
 	 * D: page down, U: page up */
-	{ MODKEY,                GDK_KEY_j,      scroll,     { .i = 'd' } },
-	{ MODKEY,                GDK_KEY_k,      scroll,     { .i = 'u' } },
+	// { MODKEY,                GDK_KEY_j,      scroll,     { .i = 'd' } },
+	// { MODKEY,                GDK_KEY_k,      scroll,     { .i = 'u' } },
 	{ MODKEY,                GDK_KEY_b,      scroll,     { .i = 'U' } },
 	{ MODKEY,                GDK_KEY_space,  scroll,     { .i = 'D' } },
 	{ MODKEY,                GDK_KEY_i,      scroll,     { .i = 'r' } },
 	{ MODKEY,                GDK_KEY_u,      scroll,     { .i = 'l' } },
 
 
-	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_j,      zoom,       { .i = -1 } },
+	// { MODKEY|GDK_SHIFT_MASK, GDK_KEY_j,      zoom,       { .i = -1 } },
+	{ MODKEY,                GDK_KEY_equal,  zoom,       { .i = -1 } },
 	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_k,      zoom,       { .i = +1 } },
 	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_q,      zoom,       { .i = 0  } },
 	{ MODKEY,                GDK_KEY_minus,  zoom,       { .i = -1 } },
@@ -146,6 +160,8 @@ static Key keys[] = {
 	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_i,      toggle,     { .i = LoadImages } },
 	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_v,      toggle,     { .i = Plugins } },
 	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_b,      toggle,     { .i = ScrollBars } },
+	{ MODKEY,                GDK_KEY_d,      spawn,    BM_PICK },
+    { MODKEY|GDK_SHIFT_MASK, GDK_KEY_d,      spawn,    BM_ADD },
 };
 
 /* button definitions */
